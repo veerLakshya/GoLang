@@ -1,4 +1,4 @@
-package main
+package intermediate
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 
 // string - sequence of bytes, immutable, array of unicode characters(rune)
 
-func main() {
+func runes() {
 	message := "hello world!"
 	rawMessage := "hello\n go"
 	defer fmt.Println(message, rawMessage)

@@ -1,6 +1,6 @@
-package main
+package intermediate
 
-func main() {
+func pointerss() {
 
 	// default value is ptr is nil
 	var ptr *int

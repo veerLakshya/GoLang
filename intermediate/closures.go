@@ -1,4 +1,4 @@
-package main
+package intermediate
 
 import "fmt"
 
@@ -49,7 +49,7 @@ func counter() counterOperations {
 	}
 }
 
-func main() {
+func closuress() {
 
 	//call our main function only once to initialize
 	f := adder()

@@ -1,4 +1,4 @@
-package main
+package intermediate
 
 import "fmt"
 
@@ -15,7 +15,7 @@ func sumOfDigits(n int) int {
 	}
 	return n%10 + sumOfDigits(n/10)
 }
-func main() {
+func recurse() {
 	fact := factorial(5)
 	sum := sumOfDigits(fact)
 	fmt.Println(sum)
