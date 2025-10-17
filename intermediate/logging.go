@@ -50,3 +50,10 @@ var (
 	warnLogger  = log.New(os.Stdout, "WARN: ", log.Ldate|log.Ltime)
 	errorLogger = log.New(os.Stdout, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
 )
+
+// Best practised
+// - use log levels
+// - structured logging
+// - contextual logging
+// - log rotation
+// - external services
