@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func main() {
+func zaplogging() {
 	logger, err := zap.NewProduction()
 	if err != nil {
 		log.Println("error in initializing zap logger")
