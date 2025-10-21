@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 )
 
 type person struct {
@@ -16,7 +17,7 @@ type address struct {
 	State string `json:"state"`
 }
 
-func main() {
+func jsonn() {
 	person1 := person{FirstName: "john"}
 	jsonData, err := json.Marshal(person1)
 
@@ -44,6 +45,16 @@ func main() {
 		return
 	}
 	fmt.Println(employeeFromJson)
+
+	// handling unkown JSON structures
+	jsonData3 := `{"name":"Lakshya veer","age" : 30, "address":{"city": "bareilly", "state": "up"}}`
+	var data map[string]any
+	err = json.Unmarshal([]byte(jsonData3), &data)
+
+	if err != nil {
+		log.Fatalln("error unmarshalling random data")
+	}
+	fmt.Println("rand data: ", data)
 }
 
 type Employee struct {
