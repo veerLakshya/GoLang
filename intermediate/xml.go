@@ -14,7 +14,7 @@ type person2 struct {
 	Email   string   `xml:"email"`
 }
 
-func main() {
+func xmll() {
 
 	p := person2{Name: "lakshya", Age: 22, City: "blr", Email: "as@asdf.com"}
 	xmlData, err := xml.MarshalIndent(p, "", "\t")
@@ -33,3 +33,17 @@ func main() {
 	}
 	fmt.Println(xmlData2)
 }
+
+type book struct {
+	XMLName xml.Name `xml:"book"`
+	ISBN    string   `xml:"isbn,attr"` // attribute of parent element
+	Title   string   `xml:"title,attr"`
+}
+
+// <book isbn="asdfasd23rf2f2r" color="blue"> asdf </blue>
+
+// best practices - use xml tags, validate xml, handle nested structrues, handle errors, custom marshalling, unmarshalling
+// use cases -
+// 1. web services and apis(sprinf framework, microsoft .net applications),
+// 2. data interchange and storage(rss and atom feeds, electronic data interchange),
+// 3. industry standards(healthcare(HL7) and finance(FIXML))
