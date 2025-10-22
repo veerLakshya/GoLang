@@ -1,8 +1,8 @@
-package main
+package intermediate
 
 import "math"
 
-func main() {
+func typess() {
 	var a int = 32
 	b := int32(a)
 	c := float64(b)
