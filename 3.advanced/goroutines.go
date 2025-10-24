@@ -1,4 +1,4 @@
-package main
+package advanced
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func main() { // this fn is running in main thread
+func goroutines() { // this fn is running in main thread
 	fmt.Println("NUMBER OF CPUs:", runtime.NumCPU())
 	fmt.Println("GOMAXPROCS:", runtime.GOMAXPROCS(2))
 
