@@ -22,9 +22,8 @@ func unbufferedChannel() {
 	-By default a unbuffered channel is created using our `name := make (chan type)` syntax
 	*Unbuffered channels cannot hold values thats why they require immediate receiver
 	-Buffered channel - a channel with an associated storage(limitted space)
-	-Buffered channels wait for all go routines to finish
+	-unBuffered channels wait for all go routines to finish
 
--unbuffered channels allow async communication
 -buffered channels dont block until buffer is full
 -buffered channels also help in load balancing, handling burst of data without immediate synchronization and hence allowing better flow control
 -unbuffered channels require immediate receivers
