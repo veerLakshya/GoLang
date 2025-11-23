@@ -1,0 +1,45 @@
+NATS
+
+micro-services need to communicate
+apps need to be resilient against failure
+apps should scale seamlessly
+new services should be added/removed without disruption
+
+
+connect many decoupled application services
+make it easy
+securely
+provide flexibility in messaging pattersn
+scalability
+
+
+type-
+    Binary          - brew install nats-server
+    Docker          - docker run --rm -p 4222:4222 nats:latest
+    Kubernetes
+
+nats is about messaging
+
+
+===========================nats server
+ |  |  |  |  |  |  |  |  |
+ |  |  |  |  |  |  |  |  |
+s1 s2 s3 s4 s5 s6 s7 s8 s9
+
+
+client 1 (S1) <-----> NATS Server <-----> client 2 (S2)
+
+sending messages
+
+SUBJECT         SUBSCRIBED_CLIENTS
+foo.bar         s1,s2,s3
+payment.post    s8
+order.sent      s1
+
+nats drops the message if no one is listening
+there is jetstream for persistence if needed
+
+
+REQUEST/REPLY messages
+    WHY?
+        - ensure message is received
