@@ -1,0 +1,36 @@
+Why use rate limiting?
+    - prevent overload
+    - fairness
+    - prevent abuse of resources
+    - cost reduction
+
+Common rate limiting algorithms-
+    - token bucket algorithm
+    - leaky bucket algorithm
+    - fixed window counter
+    - sliding window log
+    - sliding window counter
+
+* Token Bucket Algorithm
+    - fixed number of requests per window
+    - smooths out bursts of requests over time
+    - more flexible and efficient for handling variable traffic patterns
+    - slightly more complex to implement than fixed window
+    - requires precise time-based operations to add tokens
+
+* Fixed Window Algorithm
+    - divides time into fixed-size intervals(windows)
+    - simple to implement and easy to understand
+    - less flexible
+    - can lead to bursts of requests at boundary of windows
+    - not as flexible or smooth in rate limiting as other algorithms
+
+* Leaky Bucket Algorithm
+    - controls the rate by using tokens
+    - controls rate, smooth and predictable
+    - prevents sudden bursts of traffic
+    - may lead to request loss
+    - less flexible for handling variable traffic patterns compared to token bucket
+
+
+The thundering herd problem in rate limiting occurs when many clients or servers try to access a resource simultaneously after a period of unavailability, causing a sudden spike in requests that can overwhelm the system
