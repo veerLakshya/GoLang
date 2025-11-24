@@ -45,7 +45,7 @@ func (lb *LeakyBucket) Allow() bool {
 	return false
 }
 
-func main() {
+func ExampleLeakyBucket() {
 
 }
 
