@@ -1,0 +1,8 @@
+openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 365
+
+key.pem     -> contains the private key to decrypt and encrypt data using this key
+
+cert.pem    -> stores information about user
+
+* .pem extension stands for Privacy Enhanced Mail (base64 Encoded)
+* .der extension stands for Distinguished Encoding Rules (x509 certificates)
