@@ -1,0 +1,6 @@
+wrk and htop
+
+wrk -t8 -c400 -d30s "http://localhost:8080/person?id=1"
+-t8 => no. of threads to benchmark on
+-c400 => no. of concurrent connections
+-d30s => duration of test
