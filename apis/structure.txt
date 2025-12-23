@@ -1,0 +1,26 @@
+project-root
+    |--- cmd/ (this folder contains the main entry point of your application. Typically one per binary.)
+        |--- api/
+            |--- server.go (entry point)
+            |--- .env
+
+    |--- internal/
+            |--- api/
+                    |--- handlers/
+                    |--- middlewares/
+                    |--- routes.go
+            |--- models/
+            |--- repositories/
+                    |--- mongodb/
+                            |--- mongoconnect.go
+                    |--- sqlconnect/
+                            |--- sqlconnect.go
+
+    |--- pkg/
+            |--- utils/
+                    |--- error_handling.go
+                    |--- jwt_processing.go
+
+    |--- proto/
+    |--- go.mod
+    |--- go.sum
