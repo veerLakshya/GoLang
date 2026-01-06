@@ -19,9 +19,17 @@ func main() {
 	http.HandleFunc("/teachers", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("/teachers  handler", r.Method)
 
-		if r.Method == http.MethodGet {
+		switch r.Method {
+		case http.MethodGet:
 			w.Write([]byte("Hello GET on Root Route"))
-			return
+		case http.MethodDelete:
+			w.Write([]byte("Hello DELETE on Root Route"))
+		case http.MethodPatch:
+			w.Write([]byte("Hello PATCH on Root Route"))
+		case http.MethodPost:
+			w.Write([]byte("Hello POST on Root Route"))
+		case http.MethodPut:
+			w.Write([]byte("Hello PUT on Root Route"))
 		}
 
 		// fmt.Fprintf(w, "Hello Root Route")
