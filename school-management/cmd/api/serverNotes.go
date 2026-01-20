@@ -5,17 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"school-management/internal/api/middlewares"
 	"strings"
 )
 
-type User struct {
-	Name string `json:"name"`
-	Age  int    `json:"age"`
-	City string `json:"city"`
-}
-
-func rootHandler(w http.ResponseWriter, r *http.Request) {
+func rootHandlers(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("/  handler", r.Method)
 
 	// fmt.Fprintf(w, "Hello Root Route")
@@ -23,7 +16,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func teachersHandler(w http.ResponseWriter, r *http.Request) {
+func teachersHandlers(w http.ResponseWriter, r *http.Request) {
 
 	// PATH PARAMS --> teachers/{id}
 	fmt.Println("/teachers  handler", r.Method, r.URL.Path)
@@ -56,45 +49,45 @@ func teachersHandler(w http.ResponseWriter, r *http.Request) {
 	// w.Write([]byte("Hello Teachers Route"))
 }
 
-func studentsHandler(w http.ResponseWriter, r *http.Request) {
+func studentsHandlers(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("/students  handler", r.Method)
 
 	// fmt.Fprintf(w, "Hello Root Route")
 	w.Write([]byte("Hello Students Route"))
 }
 
-func execsHandler(w http.ResponseWriter, r *http.Request) {
+func execsHandlers(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("/execs  handler", r.Method)
 
 	// fmt.Fprintf(w, "Hello Root Route")
 	w.Write([]byte("Hello Execs Route"))
 }
 
-func main() {
+func NewServer() {
 	port := ":3030"
 
 	// cert := "cert.pem"
 	// key := "key.pem"
 
+	//
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", rootHandler)
+	mux.HandleFunc("/", rootHandlers)
 
-	mux.HandleFunc("/teachers/", teachersHandler)
+	mux.HandleFunc("/teachers/", teachersHandlers)
 
-	mux.HandleFunc("/students/", studentsHandler)
+	mux.HandleFunc("/students/", studentsHandlers)
 
-	mux.HandleFunc("/execs", execsHandler)
+	mux.HandleFunc("/execs", execsHandlers)
 
 	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 	}
 
-	//custom server
+	//Crete custom server
 	server := &http.Server{
-		Addr:    port,
-		Handler: middlewares.Cors(middlewares.SecurityHeaders(mux)),
-		// Handler:   middlewares.Cors(mux),
+		Addr:      port,
+		Handler:   mux,
 		TLSConfig: tlsConfig,
 	}
 
