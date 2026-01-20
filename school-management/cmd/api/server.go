@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"school-management/internal/api/middlewares"
+	mw "school-management/internal/api/middlewares"
 	"strings"
+	"time"
 )
 
 type User struct {
@@ -80,9 +81,9 @@ func main() {
 
 	mux.HandleFunc("/", rootHandler)
 
-	mux.HandleFunc("/teachers/", teachersHandler)
+	mux.HandleFunc("/teachers", teachersHandler)
 
-	mux.HandleFunc("/students/", studentsHandler)
+	mux.HandleFunc("/students", studentsHandler)
 
 	mux.HandleFunc("/execs", execsHandler)
 
@@ -90,10 +91,12 @@ func main() {
 		MinVersion: tls.VersionTLS12,
 	}
 
+	rl := mw.NewRateLimiter(5, time.Minute)
+
 	//custom server
 	server := &http.Server{
 		Addr:    port,
-		Handler: middlewares.Cors(middlewares.SecurityHeaders(mux)),
+		Handler: rl.Middleware(mw.Compression(mw.ResponseTime(mw.Cors(mw.SecurityHeaders(mux))))),
 		// Handler:   middlewares.Cors(mux),
 		TLSConfig: tlsConfig,
 	}
