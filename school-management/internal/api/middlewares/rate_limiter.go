@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -35,14 +36,16 @@ func (rl *rateLimiter) ResetVisitorCount() {
 }
 
 func (rl *rateLimiter) Middleware(next http.Handler) http.Handler {
+	fmt.Println("Rate Limiter Middleware...")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Rate Limiter Middleware begin returned...")
 		rl.mu.Lock()
 		defer rl.mu.Unlock()
 
 		// get requestIP and increment its count
 		visitorIP := r.RemoteAddr // We might extract IP in a more sophisticated way
 		rl.visitors[visitorIP]++
-		log.Printf("Visitor count of %v is %v\n", visitorIP, rl.visitors[visitorIP])
+		log.Printf("RATE LIMITER middleware - Visitor count of %v is %v\n", visitorIP, rl.visitors[visitorIP])
 
 		if rl.visitors[visitorIP] > rl.limit {
 			http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
@@ -50,6 +53,7 @@ func (rl *rateLimiter) Middleware(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
+		fmt.Println("Rate Limiter Middleware ends...")
 	})
 }
 

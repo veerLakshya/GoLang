@@ -1,8 +1,12 @@
 package middlewares
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 func SecurityHeaders(next http.Handler) http.Handler {
+	fmt.Println("Security Headers Middleware ...")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-DNS-Prefetch-Control", "off") // disables dns prefetching requres
 
@@ -24,6 +28,7 @@ func SecurityHeaders(next http.Handler) http.Handler {
 		w.Header().Set("Permissions-Policy", "geolocation=(self), microphone=()")
 
 		next.ServeHTTP(w, r)
+		fmt.Println("Security Headers Middleware ends...")
 	})
 }
 

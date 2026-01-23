@@ -3,12 +3,15 @@ package middlewares
 import (
 	"compress/gzip"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
 
 func Compression(next http.Handler) http.Handler {
+	log.Println("Compression Middleware...")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(("Compression Middleware being returned"))
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 			next.ServeHTTP(w, r)
 			return
@@ -26,7 +29,7 @@ func Compression(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(wrappedWriter, r)
-		fmt.Println("Sent Response from Compression Middleware")
+		fmt.Println(("Sent response from compression middleware"))
 	})
 }
 

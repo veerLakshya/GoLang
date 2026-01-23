@@ -7,7 +7,7 @@ import (
 	"net/http"
 	mw "school-management/internal/api/middlewares"
 	"strings"
-	"time"
+	// "time"
 )
 
 type User struct {
@@ -17,8 +17,6 @@ type User struct {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("/  handler", r.Method)
-
 	// fmt.Fprintf(w, "Hello Root Route")
 	w.Write([]byte("Hello Root Route"))
 
@@ -58,17 +56,35 @@ func teachersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func studentsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("/students  handler", r.Method)
+	log.Println("/students  handler", r.Method)
 
-	// fmt.Fprintf(w, "Hello Root Route")
 	w.Write([]byte("Hello Students Route"))
 }
 
 func execsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("/execs  handler", r.Method)
+	log.Println("/execs handler", r.Method)
 
-	// fmt.Fprintf(w, "Hello Root Route")
-	w.Write([]byte("Hello Execs Route"))
+	switch r.Method {
+	case http.MethodGet:
+		w.Write([]byte("Hello GET on Execs Route"))
+	case http.MethodDelete:
+		w.Write([]byte("Hello DELETE on Execs Route"))
+	case http.MethodPatch:
+		w.Write([]byte("Hello PATCH on Execs Route"))
+	case http.MethodPost:
+		fmt.Println("Query:", r.URL.Query())
+		fmt.Println("Query:", r.URL.Query().Get("name"))
+
+		//Parse form data(necessary for x-www-form-urlencoded)
+		err := r.ParseForm()
+		if err != nil {
+			return
+		}
+		fmt.Println("Form from POST method:", r.Form)
+		w.Write([]byte("Hello POST on Execs Route"))
+	case http.MethodPut:
+		w.Write([]byte("Hello PUT on Execs Route"))
+	}
 }
 
 func main() {
@@ -91,13 +107,24 @@ func main() {
 		MinVersion: tls.VersionTLS12,
 	}
 
-	rl := mw.NewRateLimiter(5, time.Minute)
+	// rl := mw.NewRateLimiter(5, time.Minute)
+
+	// hppOptions := mw.HPPOptions{
+	// 	CheckQuery:                  true,
+	// 	CheckBody:                   true,
+	// 	CheckBodyOnlyForContentType: "application/x-www-form-urlencoded",
+	// 	Whitelist:                   []string{"sortBy", "name", "age", "class"},
+	// }
+
+	// secureMux := mw.Cors(rl.Middleware(mw.ResponseTime(mw.SecurityHeaders(mw.Compression(mw.Hpp(hppOptions)(mux))))))
+	// function to properly chain middlewares
+	// secureMux := applyMiddlewares(mux, mw.Hpp(hppOptions), mw.Compression, mw.SecurityHeaders, mw.ResponseTime, rl.Middleware, mw.Cors)
+	secureMux := mw.SecurityHeaders(mux)
 
 	//custom server
 	server := &http.Server{
-		Addr:    port,
-		Handler: rl.Middleware(mw.Compression(mw.ResponseTime(mw.Cors(mw.SecurityHeaders(mux))))),
-		// Handler:   middlewares.Cors(mux),
+		Addr:      port,
+		Handler:   secureMux,
 		TLSConfig: tlsConfig,
 	}
 
@@ -107,4 +134,14 @@ func main() {
 	if err != nil {
 		log.Fatalln("Error starting the server: ", err)
 	}
+}
+
+// Middleware is a function that properly wraps an http.Handler with additional functionality (for chaining without cluttering)
+type Middleware func(http.Handler) http.Handler
+
+func applyMiddlewares(handler http.Handler, middlewares ...Middleware) http.Handler {
+	for _, middleware := range middlewares {
+		handler = middleware(handler)
+	}
+	return handler
 }

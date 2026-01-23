@@ -37,3 +37,13 @@ Middleware in an api servers various purposes-
 
 # Rate Limmiter Middleware
     *
+
+
+# HPP Middleware - HTTP Parameter Pollution
+    what it does?
+        -prevention of parameter Pollution
+        -normalization
+        -security
+        -flexibility
+
+    path parameters in the url (eg, `/resource/:id`) are not subject to pollution in the same way as query or body parameters, so HPP does not address them
