@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"log"
-	"my-go-files/micro-services/handlers"
+	"my-go-all/4.examples/micro-services/handlers"
 	"net/http"
 	"os"
 	"os/signal"

@@ -1,4 +1,4 @@
-module apis
+module basic-api
 
 go 1.24.4
 

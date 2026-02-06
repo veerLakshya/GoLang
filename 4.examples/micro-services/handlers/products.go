@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"log"
-	"my-go-files/micro-services/data"
+	"my-go-all/4.examples/micro-services/data"
 	"net/http"
 )
 

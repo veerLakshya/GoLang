@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"my-go-files/nats/model"
+	"my-go-all/nats-example/model"
 	"time"
 
 	"github.com/nats-io/nats.go"

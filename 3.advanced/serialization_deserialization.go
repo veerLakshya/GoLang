@@ -1,4 +1,4 @@
-package main
+package advanced
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ type User struct {
 	Email string `json:"email"`
 }
 
-func main() {
+func serialization_deserialization() {
 	user := User{
 		Name:  "Lakshya",
 		Email: "lak@ex.com",
