@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/nats-io/nats.go"
-	"github.com/veerlakshya/my-go-all/nats-example/model"
+	"github.com/veerlakshya/my-go-all/4.examples/nats/model"
 )
 
 func main() {
