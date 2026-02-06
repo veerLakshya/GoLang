@@ -1,4 +1,4 @@
-module github.com/veerLakshya/my-go-all
+module github.com/veerlakshya/my-go-all
 
 go 1.24.4
 
