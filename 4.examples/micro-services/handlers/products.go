@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/veerlakshya/my-go-all/4.examples/micro-services/data"
+	"github.com/veerLakshya/my-go-all/4.examples/micro-services/data"
 )
 
 // Products is a http.Handler
