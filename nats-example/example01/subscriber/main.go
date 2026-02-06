@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"my-go-all/nats-example/model"
 	"time"
 
 	"github.com/nats-io/nats.go"
+	"github.com/veerLakshya/my-go-all/nats-example/model"
 )
 
 func main() {

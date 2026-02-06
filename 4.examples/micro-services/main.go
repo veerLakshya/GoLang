@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"log"
-	"my-go-all/4.examples/micro-services/handlers"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/veerLakshya/my-go-all/4.examples/micro-services/handlers"
 )
 
 func main() {

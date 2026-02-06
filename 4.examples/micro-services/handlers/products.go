@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"log"
-	"my-go-all/4.examples/micro-services/data"
 	"net/http"
+
+	"github.com/veerLakshya/my-go-all/4.examples/micro-services/data"
 )
 
 // Products is a http.Handler
