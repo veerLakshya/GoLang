@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/veerlakshya/my-go-all/4.examples/micro-services/handlers"
+	"github.com/veerLakshya/my-go-all/4.examples/micro-services/handlers"
 )
 
 func main() {
