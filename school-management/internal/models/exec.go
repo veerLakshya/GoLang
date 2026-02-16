@@ -13,7 +13,7 @@ type Exec struct {
 	InactiveStatusCode bool   `json:"inactive_status,omitempty" db:"inactive_status,omitempty"`
 
 	UserUpdatedAt       sql.NullString `json:"user_updated_at,omitempty" db:"user_updated_at,omitempty"`
-	UserCreatedAt       sql.NullString `json:"user_created_at,om\itempty" db:"user_created_at,omitempty"`
+	UserCreatedAt       sql.NullString `json:"user_created_at,omitempty" db:"user_created_at,omitempty"`
 	PasswordResetCode   sql.NullString `json:"password_reset_code,omitempty" db:"password_reset_token,omitempty"`
 	PasswordCodeExpires sql.NullString `json:"password_code_expires,omitempty" db:"password_code_expires,omitempty"`
 }
