@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"school-management/internal/models"
@@ -10,7 +11,7 @@ import (
 	"strconv"
 )
 
-// func TeachersHandler(w http.ResponseWriter, r *http.Request) {
+// func OldTeachersHandler(w http.ResponseWriter, r *http.Request) {
 // switch r.Method {
 // case http.MethodGet:
 // 	getTeachersHandler(w, r)
@@ -72,14 +73,60 @@ func GetTeachersHandler(w http.ResponseWriter, r *http.Request) {
 func AddTeachersHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("postTeachersHandler:", r.URL, r.Body)
 
+	reqBody, err := io.ReadAll(r.Body) // store req body as it gets wiped out on reading once only
+	if err != nil {
+		http.Error(w, "Invalid Request Body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
 	var newTeachers []models.Teacher
-	err := json.NewDecoder(r.Body).Decode(&newTeachers)
+	var rawTeachers []map[string]interface{}
+
+	err = json.Unmarshal(reqBody, &rawTeachers)
 	if err != nil {
 		http.Error(w, "Invalid Request Body", http.StatusBadRequest)
 		return
 	}
 
+	fields := GetFieldNames(models.Teacher{})
+
+	allowedFields := make(map[string]struct{})
+	for _, field := range fields {
+		allowedFields[field] = struct{}{}
+	}
+
+	for _, teacher := range rawTeachers {
+		for key := range teacher {
+			_, ok := allowedFields[key]
+			if !ok {
+				http.Error(w, "Unacceptable field found in request. Only use allowed fields.", http.StatusBadRequest)
+				return
+			}
+		}
+	}
+
+	err = json.Unmarshal(reqBody, &newTeachers)
+	if err != nil {
+		http.Error(w, "Invalid Request Body", http.StatusBadRequest)
+		return
+	}
+
+	for _, teacher := range newTeachers {
+		// if teacher.FirstName == "" || teacher.Email == "" || teacher.Class == "" || teacher.LastName == "" || teacher.Subject == "" {
+		// 	http.Error(w, "All fields are required", http.StatusBadRequest)
+		// 	return
+		// }
+
+		err = CheckBlankFields(teacher)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+
 	var addedTeachers []models.Teacher
+
 	addedTeachers, err = sqlconnect.AddTeachersDbHandler(addedTeachers, newTeachers)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -239,4 +286,62 @@ func DeleteTeachersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(response)
 
+}
+
+func GetStudentsByTeacherId(w http.ResponseWriter, r *http.Request) {
+	teacherIdFromPath := r.PathValue("id")
+
+	teacherId, err := strconv.Atoi(teacherIdFromPath)
+	if err != nil {
+		http.Error(w, "Invalid teacher Id", http.StatusBadRequest)
+		return
+	}
+
+	var students []models.Student
+
+	students, err = sqlconnect.GetStudentsByTeacherIdDbHandler(teacherId, students)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := struct {
+		Status string           `json:"status"`
+		Count  int              `json:"count"`
+		Data   []models.Student `json:"data"`
+	}{
+		Data:   students,
+		Count:  len(students),
+		Status: "succuess",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func GetStudentCountById(w http.ResponseWriter, r *http.Request) {
+	teacherIdFromPath := r.PathValue("id")
+
+	teacherId, err := strconv.Atoi(teacherIdFromPath)
+	if err != nil {
+		http.Error(w, "Invalid teacher Id", http.StatusBadRequest)
+		return
+	}
+
+	studentCount, err := sqlconnect.GetStudentCountByTeacherIdDbHandler(teacherId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	response := struct {
+		Status string `json:"status"`
+		Count  int    `json:"count"`
+	}{
+		Count:  studentCount,
+		Status: "success",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }

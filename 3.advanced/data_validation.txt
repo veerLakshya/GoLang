@@ -1,0 +1,18 @@
+importance-
+    - security
+    - data integrity
+    - user experience
+
+types-
+    -format validation
+    -presence validation
+    -type validation
+    -value validation
+    -length validation
+
+validate early
+prove clear error messages
+be consistent
+implement server-side validation as client side validations can be bypassed
+
+validator package

@@ -2,8 +2,6 @@ package sqlconnect
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
 	"net/http"
 	"reflect"
 	"school-management/internal/models"
@@ -11,63 +9,6 @@ import (
 	"strconv"
 	"strings"
 )
-
-func isValidSortOrder(order string) bool {
-	return order == "asc" || order == "desc"
-}
-
-func isValidSortField(field string) bool {
-	validFields := map[string]bool{
-		"first_name": true,
-		"last_name":  true,
-		"email":      true,
-		"class":      true,
-		"subject":    true,
-	}
-	return validFields[field]
-}
-
-func addSorting(r *http.Request, query string) string {
-	sortParams := r.URL.Query()["sortby"]
-	if len(sortParams) > 0 {
-		query += " ORDER BY"
-		for i, param := range sortParams {
-			// sortby=name:desc
-			parts := strings.Split(param, ":")
-			if len(parts) != 2 {
-				continue
-			}
-			field, order := parts[0], parts[1]
-			if !isValidSortField(field) || !isValidSortOrder(order) {
-				continue
-			}
-			if i > 0 {
-				query += ","
-			}
-			query += " " + field + " " + order
-		}
-	}
-	return query
-}
-
-func addFilters(r *http.Request, query string, args []interface{}) (string, []interface{}) {
-	params := map[string]string{
-		"first_name": "first_name",
-		"last_name":  "last_name",
-		"email":      "email",
-		"subject":    "subject",
-		"class":      "class",
-	}
-
-	for param, dbField := range params {
-		value := r.URL.Query().Get(param)
-		if value != "" {
-			query += " AND " + dbField + " = ?"
-			args = append(args, value)
-		}
-	}
-	return query, args
-}
 
 func GetTeacherByIdDbHandler(id int) (models.Teacher, error) {
 	db, err := ConnectDB()
@@ -92,10 +33,10 @@ func GetTeachersDbHandler(teachers []models.Teacher, r *http.Request) ([]models.
 	query := "SELECT id, first_name, last_name, email, class, subject FROM teachers WHERE 1 = 1"
 	var args []interface{}
 
-	query, args = addFilters(r, query, args)
+	query, args = utils.AddFilters(r, query, args)
 
 	// also handling - teachers/?sortby=name:asc&sortby=class:desc
-	query = addSorting(r, query)
+	query = utils.AddSorting(r, query)
 
 	db, err := ConnectDB()
 	if err != nil {
@@ -127,14 +68,14 @@ func AddTeachersDbHandler(addedTeachers []models.Teacher, newTeachers []models.T
 	defer db.Close()
 
 	// stmt, err := db.Prepare("INSERT INTO teachers (first_name, last_name, email, class, subject) VALUES(?,?,?,?,?)")
-	stmt, err := db.Prepare(generateInsetQuery(models.Teacher{}))
+	stmt, err := db.Prepare(utils.GenerateInsertQuery("teachers", models.Teacher{}))
 	if err != nil {
 		return nil, utils.ErrorHandler(err, "Error updating teacher")
 	}
 	defer stmt.Close()
 
 	for _, newTeacher := range newTeachers {
-		values := getStructValues(newTeacher)
+		values := utils.GetStructValues(newTeacher)
 		// res, err := stmt.Exec(newTeacher.FirstName, newTeacher.LastName, newTeacher.Email, newTeacher.Class, newTeacher.Subject)
 		res, err := stmt.Exec(values...)
 		if err != nil {
@@ -151,44 +92,6 @@ func AddTeachersDbHandler(addedTeachers []models.Teacher, newTeachers []models.T
 		addedTeachers = append(addedTeachers, newTeacher)
 	}
 	return addedTeachers, nil
-}
-
-func generateInsetQuery(model interface{}) string {
-	modelType := reflect.TypeOf(model)
-	var columns, placeholders string
-
-	for i := 0; i < modelType.NumField(); i++ {
-		dbTag := modelType.Field(i).Tag.Get("db")
-		dbTag = strings.TrimSuffix(dbTag, ",omitempty")
-		fmt.Println("dbTag", dbTag)
-
-		if dbTag != "" && dbTag != "id" { // skip id field if its auto increment
-			if columns != "" {
-				columns += ", "
-				placeholders += ", "
-			}
-			columns += dbTag
-			placeholders += "?"
-		}
-	}
-	fmt.Printf("INSERT INTO teachers (%s) Values (%s)\n", columns, placeholders)
-	return fmt.Sprintf("INSERT INTO teachers (%s) Values (%s)", columns, placeholders)
-}
-
-func getStructValues(model interface{}) []interface{} {
-	modelValue := reflect.ValueOf(model)
-	modelType := modelValue.Type()
-
-	values := []interface{}{}
-
-	for i := 0; i < modelType.NumField(); i++ {
-		dbTag := modelType.Field(i).Tag.Get("db")
-		if dbTag != "" && dbTag != "id,omitempty" {
-			values = append(values, modelValue.Field(i).Interface())
-		}
-	}
-	log.Println("Values:", values)
-	return values
 }
 
 func UpdateTeacherByIdDbHandle(id int, updatedTeacher models.Teacher) (models.Teacher, error) {
@@ -406,4 +309,46 @@ func DeleteTeachersDbHandler(ids []int) ([]int, error) {
 		return nil, utils.ErrorHandler(err, "Error commiting deleted changes")
 	}
 	return deletedIds, nil
+}
+
+func GetStudentsByTeacherIdDbHandler(teacherId int, students []models.Student) ([]models.Student, error) {
+	db, err := ConnectDB()
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "error connecting to db")
+	}
+	defer db.Close()
+
+	query := `SELECT id, first_name, last_name, email, class FROM students WHERE class = (SELECT class FROM teachers WHERE id = ?)`
+	rows, err := db.Query(query, teacherId)
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "error running query")
+	}
+
+	for rows.Next() {
+		var student models.Student
+		err = rows.Scan(&student.ID, &student.FirstName, &student.LastName, &student.Class, &student.Email)
+		if err != nil {
+			return nil, utils.ErrorHandler(err, "error scanning row")
+		}
+		students = append(students, student)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "rows error")
+	}
+	return students, nil
+}
+
+func GetStudentCountByTeacherIdDbHandler(teacherId int) (int, error) {
+	db, err := ConnectDB()
+	if err != nil {
+		return 0, utils.ErrorHandler(err, "error connecting to db")
+	}
+	defer db.Close()
+
+	query := `SELECT COUNT(*) FROM students WHERE class = (SELECT class FROM teachers WHERE id = ?)`
+
+	var studentCount int
+	err = db.QueryRow(query, teacherId).Scan(&studentCount)
+	return studentCount, err
 }
