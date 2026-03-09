@@ -1,13 +1,19 @@
 package sqlconnect
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/base64"
+	"errors"
+	"fmt"
 	"net/http"
 	"reflect"
 	"school-management/internal/models"
 	"school-management/pkg/utils"
 	"strconv"
 	"strings"
+
+	"golang.org/x/crypto/argon2"
 )
 
 func GetExecByIdDbHandler(id int) (models.Exec, error) {
@@ -18,7 +24,7 @@ func GetExecByIdDbHandler(id int) (models.Exec, error) {
 	defer db.Close()
 
 	var exec models.Exec
-	err = db.QueryRow("SELECT id, first_name, last_name, email, username class FROM execs WHERE id = ?", id).Scan(&exec.ID, &exec.FirstName, &exec.LastName, &exec.Email, &exec.Username)
+	err = db.QueryRow("SELECT id, first_name, last_name, email, username FROM execs WHERE id = ?", id).Scan(&exec.ID, &exec.FirstName, &exec.LastName, &exec.Email, &exec.Username)
 
 	if err == sql.ErrNoRows {
 		return models.Exec{}, utils.ErrorHandler(err, "exec Not found")
@@ -67,7 +73,7 @@ func AddExecsDbHandler(addedExecs []models.Exec, newExecs []models.Exec) ([]mode
 	}
 	defer db.Close()
 
-	// stmt, err := db.Prepare("INSERT INTO Execs (first_name, last_name, email, class) VALUES(?,?,?,?,?)")
+	// stmt, err := db.Prepare("INSERT INTO Execs (first_name, last_name, email) VALUES(?,?,?,?,?)")
 	stmt, err := db.Prepare(utils.GenerateInsertQuery("execs", models.Exec{}))
 	if err != nil {
 		return nil, utils.ErrorHandler(err, "Error updating Execs")
@@ -75,6 +81,23 @@ func AddExecsDbHandler(addedExecs []models.Exec, newExecs []models.Exec) ([]mode
 	defer stmt.Close()
 
 	for _, newExec := range newExecs {
+		if newExec.Password == "" {
+			return nil, utils.ErrorHandler(errors.New("please is blank"), "please enter password")
+		}
+
+		salt := make([]byte, 16)
+		_, err := rand.Read(salt)
+		if err != nil {
+			return nil, utils.ErrorHandler(errors.New("failed to generate sale"), "error adding data")
+		}
+
+		hash := argon2.IDKey([]byte(newExec.Password), salt, 1, 64*1024, 4, 32)
+		saltBase64 := base64.StdEncoding.EncodeToString(salt)
+		hashBase64 := base64.StdEncoding.EncodeToString(hash)
+
+		encodedHash := fmt.Sprintf("%s, %s", saltBase64, hashBase64)
+		newExec.Password = encodedHash
+
 		values := utils.GetStructValues(newExec)
 		res, err := stmt.Exec(values...)
 		if err != nil {
@@ -143,7 +166,7 @@ func PatchExecsDbHandler(updates []map[string]interface{}) error {
 		}
 
 		var execFromDB models.Exec
-		err = db.QueryRow("SELECT id, first_name, last_name, username, role FROM execs WHERE id = ?", id).Scan(&execFromDB.ID, &execFromDB.FirstName, &execFromDB.LastName, &execFromDB.Email, &execFromDB.Username, &execFromDB.Role)
+		err = db.QueryRow("SELECT id, first_name, last_name, email, username, role FROM execs WHERE id = ?", id).Scan(&execFromDB.ID, &execFromDB.FirstName, &execFromDB.LastName, &execFromDB.Email, &execFromDB.Username, &execFromDB.Role)
 
 		if err != nil {
 			tx.Rollback()
@@ -178,7 +201,7 @@ func PatchExecsDbHandler(updates []map[string]interface{}) error {
 				}
 			}
 		}
-		_, err = tx.Exec("UPDATE execs SET first_name = ?, last_name = ?, email = ?, class = ? WHERE id = ?", execFromDB.FirstName, execFromDB.LastName, execFromDB.Email, execFromDB.Username, execFromDB.Role, execFromDB.ID)
+		_, err = tx.Exec("UPDATE execs SET first_name = ?, last_name = ?, email = ?, username = ?, role = ? WHERE id = ?", execFromDB.FirstName, execFromDB.LastName, execFromDB.Email, execFromDB.Username, execFromDB.Role, execFromDB.ID)
 		if err != nil {
 			tx.Rollback()
 			return utils.ErrorHandler(err, "Error updating Execss")
@@ -202,7 +225,7 @@ func PatchExecByIdDbHandler(id int, updates map[string]string) (models.Exec, err
 	defer db.Close()
 
 	var existingExec models.Exec
-	err = db.QueryRow("SELECT id, first_name, last_name, email, username, role FROM execs where id = ?", id).Scan(&existingExec.ID, &existingExec.FirstName, &existingExec.LastName, &existingExec.Email, &existingExec.Username, &existingExec.Role, id)
+	err = db.QueryRow("SELECT id, first_name, last_name, email, username, role FROM execs WHERE id = ?", id).Scan(&existingExec.ID, &existingExec.FirstName, &existingExec.LastName, &existingExec.Email, &existingExec.Username, &existingExec.Role)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return models.Exec{}, utils.ErrorHandler(err, "Exec not found")
